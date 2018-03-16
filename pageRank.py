@@ -58,13 +58,13 @@ class PageRank(object):
         #your code goes here < 1 >
         #print "self.nodeIDs : " + str(type(self.nodeIDs))
         #print "self.adjList : " + str(type(self.adjList.values()))
-        self.numberOfNodes = len(self.nodeIDs)
+        self.numberOfNodes = self.N
         self.pageRankVector = {}
         self.inListEdges = {}
         self.outDegreeNode = {}
         self.listOfSinks = []
+        self.alphaChange = (1-self.alpha)/self.numberOfNodes
 
-        i = 0
         for node in self.nodeIDs:
             # If Self Loop is enabled add self loop
             if (self.selfLoops):
@@ -90,7 +90,7 @@ class PageRank(object):
                 self.listOfSinks.append(node)
 
             # Generate Page Vector with uniform distribution
-            self.pageRankVector = {node:1/(self.numberOfNodes)}
+            self.rankVec.append(1/self.N)
         pass
         
     """
@@ -102,10 +102,20 @@ class PageRank(object):
     def solveRankIter(self, oldRankVec):
         #need to make copy of old rank vector 
         newRankVec = [r for r in oldRankVec]
-        
-        
+
+        # Page Rank for sinks
+        if ( not self.selfLoops):
+            pass
+
+        # Page rank sources and intermediate nodes
+        for node in self.nodeIDs:
+            # Ensure not a sink node
+            if node in self.listOfSinks:
+                continue
+
+            # Get Page Rank for random jump
+            newRankVec[node]
         #your code goes here < 2 >
-        
         
 
         return newRankVec
@@ -117,11 +127,22 @@ class PageRank(object):
     def solveRankToEps(self, eps):
         #copy current page rank vector
         newRankVec = [r for r in self.rankVec]
-        
+        print "Data type of newRankVec" + str(type(self.rankVec))
+        print "Size of self.rankVec" + str(len(self.rankVec))
         
         #your code goes here < 3 >
-        
-                
+        repeat = True
+
+        while(repeat):
+            newRankVec_created = self.solveRankIter(newRankVec)
+            max_diff = 0
+            for i in range(self.N):
+                diff = newRankVec_created[i] - newRankVec[i]
+                if max_diff < diff:
+                    max_diff = diff
+            if(max_diff > eps):
+                repeat = False
+            newRankVec = newRankVec_created
         return newRankVec    
     
     
