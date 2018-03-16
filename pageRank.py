@@ -56,8 +56,41 @@ class PageRank(object):
         
         
         #your code goes here < 1 >
-        
-        
+        #print "self.nodeIDs : " + str(type(self.nodeIDs))
+        #print "self.adjList : " + str(type(self.adjList.values()))
+        self.numberOfNodes = len(self.nodeIDs)
+        self.pageRankVector = {}
+        self.inListEdges = {}
+        self.outDegreeNode = {}
+        self.listOfSinks = []
+
+        i = 0
+        for node in self.nodeIDs:
+            # If Self Loop is enabled add self loop
+            if (self.selfLoops):
+                self.adjList[node].append(node)
+                pass
+            
+            currentEdges = self.adjList[node]
+            # Add to all edges to inlist and count degrees
+            count = 0
+            for edge in currentEdges:
+                if edge in self.inListEdges:
+                    self.inListEdges[edge].append(node)
+                else:
+                    l = [node]
+                    self.inListEdges = {edge:l}
+                count+1
+            
+            # Add degrees to out degree node
+            self.outDegreeNode = {node:count}
+
+            # Add sink to list
+            if (count==0):
+                self.listOfSinks.append(node)
+
+            # Generate Page Vector with uniform distribution
+            self.pageRankVector = {node:1/(self.numberOfNodes)}
         pass
         
     """
