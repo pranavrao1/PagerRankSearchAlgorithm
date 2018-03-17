@@ -118,20 +118,13 @@ class PageRank(object):
 
         # Page rank sources and intermediate nodes
         for node in self.nodeIDs:
-            # Ensure not a sink node
-            #if node in self.listOfSinks:
-            #    continue
 
-            #print "For node: " + str(node)
             # Get Page Rank for random jump
             indexOfNode = self.nodeIndexes[node]
             newRankVec[indexOfNode] = changeFactor + self.alphaChange
-            #print "Node: " + str(node) + " in list: " + str(self.inListEdges)
-            #print "Node type:" + str(type(node)) + " in list type: " + str(type(self.inListEdges[node]))
             if node in self.inListEdges:
                 for edge in self.inListEdges[node]:
                     indexOfEdge = self.nodeIndexes[edge]
-                    #print "New Rank Vec:" + str(newRankVec[node]) + " Out degree node: " + str(self.outDegreeNode)
                     newRankVec[indexOfNode] = newRankVec[indexOfNode] + (self.alpha*oldRankVec[indexOfEdge])/self.outDegreeNode[edge]
 
         return newRankVec
@@ -143,8 +136,6 @@ class PageRank(object):
     def solveRankToEps(self, eps):
         #copy current page rank vector
         newRankVec = [r for r in self.rankVec]
-        print "Data type of newRankVec" + str(type(self.rankVec))
-        print "Size of self.rankVec" + str(len(self.rankVec))
         
         #your code goes here < 3 >
         repeat = True
