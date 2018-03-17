@@ -2,7 +2,7 @@
 """
 Created on Wed Jan 03 14:40:02 2018
 
-@author: your full name as it appears in gradescope here
+@author: Pranav Pradeep Rao (prao43)
 """
 
 import time
@@ -64,7 +64,9 @@ class PageRank(object):
         self.outDegreeNode = {}
         self.listOfSinks = []
         self.alphaChange = (1-self.alpha)/self.numberOfNodes
+        self.nodeIndexes = {}
 
+        index = 0
         for node in self.nodeIDs:
             # If Self Loop is enabled add self loop
             if (self.selfLoops):
@@ -79,11 +81,11 @@ class PageRank(object):
                     self.inListEdges[edge].append(node)
                 else:
                     l = [node]
-                    self.inListEdges = {edge:l}
-                count+1
+                    self.inListEdges.update({edge:l})
+                count+=1
             
             # Add degrees to out degree node
-            self.outDegreeNode = {node:count}
+            self.outDegreeNode.update({node:count})
 
             # Add sink to list
             if (count==0):
@@ -91,6 +93,9 @@ class PageRank(object):
 
             # Generate Page Vector with uniform distribution
             self.rankVec.append(1/self.N)
+
+            self.nodeIndexes.update({node:index})
+            index+=1
         pass
         
     """
@@ -103,20 +108,31 @@ class PageRank(object):
         #need to make copy of old rank vector 
         newRankVec = [r for r in oldRankVec]
 
+        changeFactor = 0
         # Page Rank for sinks
         if ( not self.selfLoops):
+            for node in self.listOfSinks:
+                indexOfNode = self.nodeIndexes[node]
+                changeFactor = changeFactor + self.alpha*oldRankVec[indexOfNode]/self.N
             pass
 
         # Page rank sources and intermediate nodes
         for node in self.nodeIDs:
             # Ensure not a sink node
-            if node in self.listOfSinks:
-                continue
+            #if node in self.listOfSinks:
+            #    continue
 
+            #print "For node: " + str(node)
             # Get Page Rank for random jump
-            newRankVec[node]
-        #your code goes here < 2 >
-        
+            indexOfNode = self.nodeIndexes[node]
+            newRankVec[indexOfNode] = changeFactor + self.alphaChange
+            #print "Node: " + str(node) + " in list: " + str(self.inListEdges)
+            #print "Node type:" + str(type(node)) + " in list type: " + str(type(self.inListEdges[node]))
+            if node in self.inListEdges.keys():
+                for edge in self.inListEdges[node]:
+                    indexOfEdge = self.nodeIndexes[edge]
+                    #print "New Rank Vec:" + str(newRankVec[node]) + " Out degree node: " + str(self.outDegreeNode)
+                    newRankVec[indexOfNode] = newRankVec[indexOfNode] + (self.alpha*oldRankVec[indexOfEdge])/self.outDegreeNode[edge]
 
         return newRankVec
     
@@ -136,12 +152,12 @@ class PageRank(object):
         while(repeat):
             newRankVec_created = self.solveRankIter(newRankVec)
             max_diff = 0
+            repeat = False
             for i in range(self.N):
                 diff = newRankVec_created[i] - newRankVec[i]
-                if max_diff < diff:
-                    max_diff = diff
-            if(max_diff > eps):
-                repeat = False
+                if diff >= eps:
+                    repeat = True
+                    break
             newRankVec = newRankVec_created
         return newRankVec    
     
