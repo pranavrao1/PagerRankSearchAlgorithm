@@ -128,7 +128,7 @@ class PageRank(object):
             newRankVec[indexOfNode] = changeFactor + self.alphaChange
             #print "Node: " + str(node) + " in list: " + str(self.inListEdges)
             #print "Node type:" + str(type(node)) + " in list type: " + str(type(self.inListEdges[node]))
-            if node in self.inListEdges.keys():
+            if node in self.inListEdges:
                 for edge in self.inListEdges[node]:
                     indexOfEdge = self.nodeIndexes[edge]
                     #print "New Rank Vec:" + str(newRankVec[node]) + " Out degree node: " + str(self.outDegreeNode)
