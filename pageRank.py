@@ -56,48 +56,67 @@ class PageRank(object):
         
         
         #your code goes here < 1 >
-        #print "self.nodeIDs : " + str(type(self.nodeIDs))
-        #print "self.adjList : " + str(type(self.adjList.values()))
-        self.numberOfNodes = self.N
-        self.pageRankVector = {}
-        self.inListEdges = {}
-        self.outDegreeNode = {}
-        self.listOfSinks = []
-        self.alphaChange = (1-self.alpha)/self.numberOfNodes
-        self.nodeIndexes = {}
+        N = self.N
+        pageRankVector = {}
+        inListEdges = {}
+        outDegreeNode = {}
+        listOfSinks = []
+        alphaChange = (1-self.alpha)/N
+        nodeIndexes = {}
+        pageRankMultiplier = self.alpha/N
+        nodeIDs = self.nodeIDs
+        selfLoops = self.selfLoops
+        adjList = self.adjList
+        rankVec = []
 
         index = 0
-        for node in self.nodeIDs:
+        updateIndex = nodeIndexes.update
+        appendRankVec = rankVec.append
+        appendListOfSinks = listOfSinks.append
+        outDegreeNodeUpdate = outDegreeNode.update
+        inListEdgesUpdate = inListEdges.update
+        for node in nodeIDs:
             # If Self Loop is enabled add self loop
-            if (self.selfLoops):
+            if (selfLoops):
                 self.adjList[node].append(node)
                 pass
             
-            currentEdges = self.adjList[node]
+            currentEdges = adjList[node]
             # Add to all edges to inlist and count degrees
             count = 0
             for edge in currentEdges:
-                if edge in self.inListEdges:
-                    self.inListEdges[edge].append(node)
+                if edge in inListEdges:
+                    inListEdges[edge].append(node)
                 else:
                     l = [node]
-                    self.inListEdges.update({edge:l})
+                    inListEdgesUpdate({edge:l})
                 count+=1
             
             # Add degrees to out degree node
-            self.outDegreeNode.update({node:count})
+            if (count>0):
+                outDegreeNodeUpdate({node:count})
 
             # Add sink to list
             if (count==0):
-                self.listOfSinks.append(node)
+                appendListOfSinks(node)
 
             # Generate Page Vector with uniform distribution
-            self.rankVec.append(1/self.N)
+            appendRankVec(1/N)
 
-            self.nodeIndexes.update({node:index})
+            updateIndex({node:index})
             index+=1
-        pass
         
+        self.pageRankVector = pageRankVector
+        self.inListEdges = inListEdges
+        self.outDegreeNode = outDegreeNode
+        self.listOfSinks = listOfSinks
+        self.nodeIndexes = nodeIndexes
+        self.rankVec = rankVec
+        self.adjList = adjList
+        self.rankVec = rankVec
+        self.alphaChange = alphaChange
+        self.pageRankMultiplier = pageRankMultiplier
+
     """
     Task 2 : using in-list structure, out-degree structure, (and sink-related 
     structure if appropriate for current sink handling strategy) :
@@ -109,23 +128,34 @@ class PageRank(object):
         newRankVec = [r for r in oldRankVec]
 
         changeFactor = 0
+        selfLoops = self.selfLoops
+        listOfSinks = self.listOfSinks
+        pageRankMultiplier = self.pageRankMultiplier
+        nodeIDs = self.nodeIDs
+        nodeIndexes = self.nodeIndexes
+        inListEdges = self.inListEdges
+        alpha = self.alpha
+        outDegreeNode = self.outDegreeNode
+        alphaChange = self.alphaChange
+
         # Page Rank for sinks
-        if ( not self.selfLoops):
-            for node in self.listOfSinks:
-                indexOfNode = self.nodeIndexes[node]
-                changeFactor = changeFactor + self.alpha*oldRankVec[indexOfNode]/self.N
+        if ( not selfLoops):
+            for node in listOfSinks:
+                indexOfNode = nodeIndexes[node]
+                changeFactor = changeFactor + pageRankMultiplier*oldRankVec[indexOfNode]
             pass
 
         # Page rank sources and intermediate nodes
-        for node in self.nodeIDs:
+        for node in nodeIDs:
 
             # Get Page Rank for random jump
-            indexOfNode = self.nodeIndexes[node]
-            newRankVec[indexOfNode] = changeFactor + self.alphaChange
-            if node in self.inListEdges:
-                for edge in self.inListEdges[node]:
-                    indexOfEdge = self.nodeIndexes[edge]
-                    newRankVec[indexOfNode] = newRankVec[indexOfNode] + (self.alpha*oldRankVec[indexOfEdge])/self.outDegreeNode[edge]
+            indexOfNode = nodeIndexes[node]
+            newRankVec[indexOfNode] = changeFactor + alphaChange
+            if node in inListEdges:
+                l = inListEdges[node]
+                for edge in l:
+                    indexOfEdge = nodeIndexes[edge]
+                    newRankVec[indexOfNode] = newRankVec[indexOfNode] + alpha*oldRankVec[indexOfEdge]/outDegreeNode[edge]
 
         return newRankVec
     
@@ -139,13 +169,15 @@ class PageRank(object):
         
         #your code goes here < 3 >
         repeat = True
+        N = self.N
+        solveRankIter = self.solveRankIter
 
         while(repeat):
-            newRankVec_created = self.solveRankIter(newRankVec)
-            max_diff = 0
+            newRankVec_created = solveRankIter(newRankVec)
             repeat = False
-            for i in range(self.N):
-                diff = newRankVec_created[i] - newRankVec[i]
+            numbers = xrange(N)
+            for i in numbers:
+                diff = abs(newRankVec_created[i] - newRankVec[i])
                 if diff >= eps:
                     repeat = True
                     break
